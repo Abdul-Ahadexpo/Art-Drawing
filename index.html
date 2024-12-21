@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculator.com</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.22/dist/full.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/5fc4420cfa.js" crossorigin="anonymous"></script>
+  <!-- Plotly.js for graphing -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body class="bg-gray-900 text-white flex justify-center items-center h-screen">
+
+  <div id="calculator" class="bg-gray-800 p-6 rounded-xl shadow-xl w-96">
+    <input id="display" readonly
+      class="w-full text-center text-4xl p-4 bg-gray-700 border border-gray-600 rounded mb-4 focus:outline-none text-white" />
+    <div id="keys" class="grid grid-cols-4 gap-4">
+      <button onclick="appendToDisplay('+')"
+        class="bg-blue-500 hover:bg-blue-400 text-white py-3 rounded-lg shadow-lg transition duration-200">
+        <i class="fas fa-plus"></i>
+      </button>
+      <button onclick="appendToDisplay('7')"
+        class="bg-gray-600 hover:bg-gray-500 text-white py-3 rounded-lg shadow-lg transition duration-200">7</button>
+      <button onclick="appendToDisplay('8')"
+        class="bg-gray-600 hover:bg-gray-500 text-white py-3 rounded-lg shadow-lg transition duration-200">8</button>
+      <button onclick="appendToDisplay('9')"
+        class="bg-gray-600 hover:bg-gray-500 text-white py-3 rounded-lg shadow-lg transition duration-200">9</button>
+      <button onclick="appendToDisplay('-')"
+        class="bg-blue-500 hover:bg-blue-400 text-white py-3 rounded-lg shadow-lg transition duration-200">
+        <i class="fas fa-minus"></i>
+      </button>
+      <button onclick="appendToDisplay('4')"
+        class="bg-gray-600 hover:bg-gray-500 text-white py-3 rounded-lg shadow-lg transition duration-200">4</button>
+      <button onclick="appendToDisplay('5')"
+        class="bg-gray-600 hover:bg-gray-500 text-white py-3 rounded-lg shadow-lg transition duration-200">5</button>
+      <button onclick="appendToDisplay('6')"
+        class="bg-gray-600 hover:bg-gray-500 text-white py-3 rounded-lg shadow-lg transition duration-200">6</button>
+      <button onclick="appendToDisplay('×')"
+        class="bg-blue-500 hover:bg-blue-400 text-white py-3 rounded-lg shadow-lg transition duration-200">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <button onclick="appendToDisplay('1')"
+        class="bg-gray-600 hover:bg-gray-500 text-white py-3 rounded-lg shadow-lg transition duration-200">1</button>
+      <button onclick="appendToDisplay('2')"
+        class="bg-gray-600 hover:bg-gray-500 text-white py-3 rounded-lg shadow-lg transition duration-200">2</button>
+      <button onclick="appendToDisplay('3')"
+        class="bg-gray-600 hover:bg-gray-500 text-white py-3 rounded-lg shadow-lg transition duration-200">3</button>
+      <button onclick="appendToDisplay('/')"
+        class="bg-blue-500 hover:bg-blue-400 text-white py-3 rounded-lg shadow-lg transition duration-200">
+        <i class="fas fa-divide"></i>
+      </button>
+      <button onclick="appendToDisplay('0')"
+        class="bg-gray-600 hover:bg-gray-500 text-white py-3 rounded-lg shadow-lg transition duration-200 col-span-2">0</button>
+      <button onclick="appendToDisplay('.')"
+        class="bg-gray-600 hover:bg-gray-500 text-white py-3 rounded-lg shadow-lg transition duration-200">.</button>
+      <button onclick="calculate()"
+        class="bg-green-500 hover:bg-green-400 text-white py-3 rounded-lg shadow-lg transition duration-200">
+        <i class="fas fa-equals"></i>
+      </button>
+      <button onclick="clearDisplay()"
+        class="bg-red-500 hover:bg-red-400 text-white py-3 rounded-lg shadow-lg transition duration-200">
+        <i class="fas fa-times-circle"></i>
+      </button>
+      <!-- Button for Graphing -->
+      <button onclick="plotGraph()"
+        class="bg-yellow-500 hover:bg-yellow-400 text-white py-3 rounded-lg shadow-lg transition duration-200 col-span-4">
+        Graph
+      </button>
+    </div>
+  </div>
+
+  <div id="graph" class="fixed top-0 left-0 right-0 bottom-0 bg-white hidden">
+    <div class="flex justify-end p-4">
+      <button onclick="closeGraph()"
+        class="bg-red-500 hover:bg-red-400 text-white py-2 px-4 rounded-lg transition duration-200">Close</button>
+    </div>
+    <div id="plotly-graph" class="w-full h-full max-h-screen"></div>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+
+    function appendToDisplay(input) {
+      display.value += input;
+    }
+
+    function clearDisplay() {
+      display.value = "";
+    }
+
+    function calculate() {
+      try {
+        display.value = eval(display.value.replace('×', '*'));
+      } catch (error) {
+        display.value = "Error";
+        setTimeout(() => {
+          clearDisplay();
+        }, 2000);
+      }
+    }
+
+    function plotGraph() {
+      // Show the graphing window
+      document.getElementById("graph").classList.remove("hidden");
+
+      // Get the expression from the display and create a simple x-y graph
+      const expression = display.value.replace('×', '*');
+
+      // Generate graph points (basic example, you can modify as needed)
+      const xValues = [];
+      const yValues = [];
+
+      for (let x = -10; x <= 10; x++) {
+        try {
+          const y = eval(expression.replace(/x/g, `(${x})`));
+          xValues.push(x);
+          yValues.push(y);
+        } catch (error) {
+          break;
+        }
+      }
+
+      const trace = {
+        x: xValues,
+        y: yValues,
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: 'blue' },
+      };
+
+      const layout = {
+        title: `Graph of ${expression}`,
+        xaxis: { title: 'X' },
+        yaxis: { title: 'Y' },
+        autosize: true,
+        margin: { t: 20, b: 20, l: 20, r: 20 }, // Responsive margin
+      };
+
+      Plotly.newPlot('plotly-graph', [trace], layout);
+    }
+
+    function closeGraph() {
+      document.getElementById("graph").classList.add("hidden");
+    }
+  </script>
+
+</body>
+
+</html>
